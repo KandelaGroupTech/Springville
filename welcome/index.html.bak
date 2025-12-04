@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Casa Springville Welcome</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', 'serif'],
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            'ghana-red': '#CE1126',
+            'ghana-yellow': '#FCD116',
+            'ghana-green': '#006B3F',
+            'us-blue': '#3C3B6E',
+            'casa-gold': '#D4AF37',
+            'casa-dark': '#0F172A',
+          },
+          animation: {
+            marquee: 'marquee 45s linear infinite',
+          },
+          keyframes: {
+            marquee: {
+              '0%': { transform: 'translateX(0%)' },
+              '100%': { transform: 'translateX(-50%)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0f172a;
+      /* Fallback dark */
+      color: #e2e8f0;
+    }
+
+    /* Hide scrollbar for kiosk feel */
+    ::-webkit-scrollbar {
+      width: 0px;
+      background: transparent;
+    }
+  </style>
+
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react-qr-code": "https://aistudiocdn.com/react-qr-code@^2.0.18"
+  }
+}
+</script>
+
+  <!-- Guest Data Loader -->
+  <script>
+    // Load guest data and make it available globally
+    window.CASA_GUEST_DATA = null;
+
+    fetch('/api/get-guest')
+      .then(response => response.json())
+      .then(data => {
+        window.CASA_GUEST_DATA = data;
+        console.log('Guest data loaded:', data);
+
+        // Dispatch custom event for React app
+        window.dispatchEvent(new CustomEvent('guestDataLoaded', { detail: data }));
+
+        // START DOM PATCHER
+        // Since we can't recompile the React app, we manually update the DOM
+        // once it renders the default "Ramona" text.
+        const updateDOM = () => {
+          if (!data || !data.firstName) return;
+
+          // 1. Update Main Welcome Title
+          // Look for "Welcome, Ramona."
+          const headings = document.querySelectorAll('h1, h2, h3, div');
+          headings.forEach(el => {
+            if (el.textContent.includes('Welcome, Ramona')) {
+              el.innerHTML = el.innerHTML.replace('Ramona', `<span class="text-casa-gold">${data.firstName}</span>`);
+            }
+          });
+
+          // 2. Update Concierge Note
+          // Use XPath to find the deepest element containing the text
+          // This prevents replacing the content of a parent container and wiping out the page
+          const findDeepestNode = (text) => {
+            try {
+              const xpath = `//*[contains(text(),'${text}')]`;
+              const result = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+              // Return the last one (usually the deepest)
+              if (result.snapshotLength > 0) {
+                return result.snapshotItem(result.snapshotLength - 1);
+              }
+            } catch (e) {
+              console.error('XPath error:', e);
+            }
+            return null;
+          };
+
+          const targets = ['Welcome back, Ramona', 'Loading personalized briefing'];
+
+          targets.forEach(target => {
+            const el = findDeepestNode(target);
+            if (el) {
+              // Only replace if it's a leaf node or close to it
+              if (el.children.length === 0) {
+                el.textContent = `"${data.conciergeNote}"`;
+              }
+            }
+          });
+        };
+
+        // Run immediately in case it's already there
+        updateDOM();
+
+        // Run continuously for a few seconds to catch React rendering
+        const interval = setInterval(updateDOM, 100);
+        setTimeout(() => clearInterval(interval), 5000); // Stop after 5 seconds
+
+        // Also use MutationObserver for long-term updates
+        const observer = new MutationObserver((mutations) => {
+          updateDOM();
+        });
+
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true
+        });
+        // END DOM PATCHER
+      })
+      .catch(error => {
+        console.error('Failed to load guest data:', error);
+      });
+  </script>
+
+  <script type="module" crossorigin src="/welcome/assets/index-v2.js"></script>
+  <link rel="stylesheet" crossorigin href="/welcome/assets/index-BOs0pUsY.css">
+</head>
+
+<body>
+  <div id="root"></div>
+</body>
+
+</html>
