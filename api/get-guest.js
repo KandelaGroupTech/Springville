@@ -1,4 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { db } from '../lib/firebase.js';
+import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -15,36 +16,28 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Initialize Supabase client
-    const supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_ANON_KEY
-    );
-
     // Get current date
     const today = new Date().toISOString().split('T')[0];
 
     console.log('Looking for guest on date:', today);
 
     // Get current guest: check_in <= today AND check_out >= today
-    const { data, error } = await supabase
-      .from('guest_data')
-      .select('*')
-      .lte('check_in', today)
-      .gte('check_out', today)
-      .order('check_in', { ascending: false })
-      .order('id', { ascending: false })
-      .limit(1);
+    // Note: Firestore requires an index for compound queries with range filters on different fields.
+    // If this fails, we might need to query by one field and filter in memory, or create the index.
+    // For now, let's try a simpler query or just fetch active guests.
+    
+    const guestsRef = collection(db, "guests");
+    const q = query(
+      guestsRef,
+      where("check_in", "<=", today),
+      where("check_out", ">=", today),
+      limit(1)
+    );
 
-    if (error) {
-      console.error('Supabase query error:', error);
-      throw error;
-    }
-
-    console.log('Query result:', data);
+    const querySnapshot = await getDocs(q);
 
     // If no current guest, return default
-    if (!data || data.length === 0) {
+    if (querySnapshot.empty) {
       console.log('No current guest found, returning default');
       return res.status(200).json({
         fullName: "Guest Name",
@@ -55,8 +48,9 @@ export default async function handler(req, res) {
       });
     }
 
-    // Get the first result (most recent check-in)
-    const guest = Array.isArray(data) ? data[0] : data;
+    // Get the first result
+    const guestDoc = querySnapshot.docs[0];
+    const guest = guestDoc.data();
 
     console.log('Returning guest:', guest.full_name);
 

@@ -1,4 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { db } from '../lib/firebase.js';
+import { collection, addDoc } from 'firebase/firestore';
 
 export default async function handler(req, res) {
     // Set CORS headers
@@ -45,41 +46,29 @@ export default async function handler(req, res) {
         // Extract first name
         const firstName = fullName.trim().split(' ')[0];
 
-        // Initialize Supabase client
-        const supabase = createClient(
-            process.env.SUPABASE_URL,
-            process.env.SUPABASE_ANON_KEY
-        );
-
         // Prepare guest data
         const guestData = {
             full_name: fullName.trim(),
             first_name: firstName,
             check_in: checkIn,
             check_out: checkOut,
-            concierge_note: conciergeNote || ''
+            concierge_note: conciergeNote || '',
+            created_at: new Date().toISOString()
         };
 
-        // Insert new guest (no longer upsert - allow multiple guests)
-        const { data, error } = await supabase
-            .from('guest_data')
-            .insert(guestData)
-            .select()
-            .single();
-
-        if (error) {
-            throw error;
-        }
+        // Insert new guest into Firestore
+        const docRef = await addDoc(collection(db, "guests"), guestData);
 
         return res.status(200).json({
             success: true,
             message: 'Guest data added successfully',
             data: {
-                fullName: data.full_name,
-                firstName: data.first_name,
-                checkIn: data.check_in,
-                checkOut: data.check_out,
-                conciergeNote: data.concierge_note
+                id: docRef.id,
+                fullName: guestData.full_name,
+                firstName: guestData.first_name,
+                checkIn: guestData.check_in,
+                checkOut: guestData.check_out,
+                conciergeNote: guestData.concierge_note
             }
         });
     } catch (error) {
