@@ -38,7 +38,16 @@
   </style>
 </head>
 
-<body class="min-h-screen flex flex-col items-center justify-center p-8 font-sans">
+<body class="min-h-screen flex flex-col items-center justify-center p-8 font-sans relative">
+
+  <!-- Date and Time Display -->
+  <div class="absolute top-6 right-6 md:top-10 md:right-10 text-right z-20">
+    <div id="current-time" class="text-3xl md:text-5xl font-serif text-white font-bold tracking-wider drop-shadow-lg">
+      --:--</div>
+    <div id="current-date"
+      class="text-casa-gold text-xs md:text-sm uppercase tracking-[0.2em] mt-1 font-medium drop-shadow-md">-- --, ----
+    </div>
+  </div>
 
   <div id="loading" class="text-casa-gold text-xl animate-pulse">Loading guest experience...</div>
 
@@ -140,6 +149,24 @@
         document.getElementById('check-in').textContent = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
         document.getElementById('check-out').textContent = nextWeek.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
       });
+
+    // Date and Time Update
+    function updateDateTime() {
+      const now = new Date();
+
+      // Time: 12:00 PM
+      const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
+      const timeString = now.toLocaleTimeString('en-US', timeOptions);
+      document.getElementById('current-time').textContent = timeString;
+
+      // Date: THURSDAY, DECEMBER 5
+      const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
+      const dateString = now.toLocaleDateString('en-US', dateOptions);
+      document.getElementById('current-date').textContent = dateString;
+    }
+
+    setInterval(updateDateTime, 1000);
+    updateDateTime(); // Initial call
   </script>
 </body>
 
