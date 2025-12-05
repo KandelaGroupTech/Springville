@@ -92,10 +92,11 @@
           document.getElementById('concierge-note').textContent = `"${data.conciergeNote}"`;
         }
         if (data.checkIn) {
-          document.getElementById('check-in').textContent = new Date(data.checkIn).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+          // Append T00:00:00 to force local time interpretation instead of UTC
+          document.getElementById('check-in').textContent = new Date(data.checkIn + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
         }
         if (data.checkOut) {
-          document.getElementById('check-out').textContent = new Date(data.checkOut).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+          document.getElementById('check-out').textContent = new Date(data.checkOut + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
         }
       })
       .catch(err => {

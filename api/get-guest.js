@@ -22,22 +22,25 @@ export default async function handler(req, res) {
     console.log('Looking for guest on date:', today);
 
     // Get current guest: check_in <= today AND check_out >= today
-    // Note: Firestore requires an index for compound queries with range filters on different fields.
-    // If this fails, we might need to query by one field and filter in memory, or create the index.
-    // For now, let's try a simpler query or just fetch active guests.
-    
+    // We query by check_out >= today to find active/future guests, then filter in memory
+    // to avoid needing a composite index for this simple app.
+
     const guestsRef = collection(db, "guests");
     const q = query(
       guestsRef,
-      where("check_in", "<=", today),
       where("check_out", ">=", today),
-      limit(1)
+      orderBy("check_out", "asc") // Optional, but good for consistency
     );
 
     const querySnapshot = await getDocs(q);
 
+    // Filter in memory for check_in <= today
+    const activeGuests = querySnapshot.docs
+      .map(doc => doc.data())
+      .filter(guest => guest.check_in <= today);
+
     // If no current guest, return default
-    if (querySnapshot.empty) {
+    if (activeGuests.length === 0) {
       console.log('No current guest found, returning default');
       return res.status(200).json({
         fullName: "Guest Name",
@@ -48,9 +51,15 @@ export default async function handler(req, res) {
       });
     }
 
-    // Get the first result
-    const guestDoc = querySnapshot.docs[0];
-    const guest = guestDoc.data();
+    // Sort in memory by created_at descending to get the latest update
+    activeGuests.sort((a, b) => {
+      const dateA = new Date(a.created_at || 0);
+      const dateB = new Date(b.created_at || 0);
+      return dateB - dateA;
+    });
+
+    // Get the first result (most recently created)
+    const guest = activeGuests[0];
 
     console.log('Returning guest:', guest.full_name);
 
