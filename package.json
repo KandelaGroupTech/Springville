@@ -4,7 +4,7 @@
     "description": "Casa Springville Home Portal",
     "type": "module",
     "scripts": {
-        "dev": "vercel dev",
+        "start": "vercel dev",
         "build": "echo 'No build needed - static site'"
     },
     "dependencies": {

@@ -1,3 +1,19 @@
+{
+  "outputDirectory": ".",
+  "rewrites": [
+    {
+      "source": "/welcome",
+      "destination": "/welcome/index.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/welcome/assets/(.*)",
+      "headers": [
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
