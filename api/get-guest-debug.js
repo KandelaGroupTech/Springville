@@ -21,11 +21,15 @@ export default async function handler(req, res) {
 
     console.log('Looking for guest on date:', today);
 
+    // Get current guest: check_in <= today AND check_out >= today
+    // We query by check_out >= today to find active/future guests, then filter in memory
+    // to avoid needing a composite index for this simple app.
+
     const guestsRef = collection(db, "guests");
     const q = query(
       guestsRef,
       where("check_out", ">=", today),
-      orderBy("check_out", "asc")
+      orderBy("check_out", "asc") // Optional, but good for consistency
     );
 
     const querySnapshot = await getDocs(q);
@@ -35,11 +39,11 @@ export default async function handler(req, res) {
       .map(doc => doc.data())
       .filter(guest => guest.check_in <= today);
 
-    const discardedGuests = querySnapshot.docs.map(doc => doc.data()).filter(g => g.check_in > today);
-
     // If no current guest, return default
     if (activeGuests.length === 0) {
       console.log('No current guest found, returning default');
+      const discardedGuests = querySnapshot.docs.map(doc => doc.data()).filter(g => g.check_in > today);
+
       return res.status(200).json({
         fullName: "Guest Name",
         firstName: "Guest",
@@ -51,19 +55,24 @@ export default async function handler(req, res) {
           activeCount: 0,
           names: [],
           today: today,
-          discarded: discardedGuests.map(g => ({ name: g.full_name, checkIn: g.check_in, checkOut: g.check_out }))
+          discarded: discardedGuests.map(g => ({ name: g.full_name, checkIn: g.check_in }))
         }
       });
     }
 
-    // Sort in memory by created_at descending
+    // Sort in memory by created_at descending to get the latest update
     activeGuests.sort((a, b) => {
       const dateA = new Date(a.created_at || 0);
       const dateB = new Date(b.created_at || 0);
       return dateB - dateA;
     });
 
+    // Get the first result (most recently created)
     const guest = activeGuests[0];
+
+    console.log('Returning guest:', guest.full_name);
+
+    const discardedGuests = querySnapshot.docs.map(doc => doc.data()).filter(g => g.check_in > today);
 
     return res.status(200).json({
       fullName: guest.full_name,
@@ -76,7 +85,7 @@ export default async function handler(req, res) {
         activeCount: activeGuests.length,
         names: activeGuests.map(g => g.full_name),
         today: today,
-        discarded: discardedGuests.map(g => ({ name: g.full_name, checkIn: g.check_in, checkOut: g.check_out }))
+        discarded: discardedGuests.map(g => ({ name: g.full_name, checkIn: g.check_in }))
       }
     });
   } catch (error) {

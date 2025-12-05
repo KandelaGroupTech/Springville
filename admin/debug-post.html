@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <h1>Debug Post</h1>
+    <div id="result">Posting...</div>
+    <script>
+        fetch('/api/update-guest-debug', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                fullName: "Browser Debug Guest",
+                checkIn: "2025-12-05",
+                checkOut: "2025-12-06",
+                conciergeNote: "Posted via browser"
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('result').innerText = JSON.stringify(data, null, 2);
+            })
+            .catch(err => {
+                document.getElementById('result').innerText = "Error: " + err.message;
+            });
+    </script>
+</body>
+
+</html>

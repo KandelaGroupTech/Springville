@@ -233,8 +233,21 @@
                     showMessage('Guest added successfully!', 'success');
                     // Clear form
                     form.reset();
-                ?'bg-green-500/20 border border-green-500/30 text-green-300'
-                : 'bg-red-500/20 border border-red-500/30 text-red-300'
+                } else {
+                    showMessage(result.error || 'Failed to add guest', 'error');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('An error occurred. Please try again.', 'error');
+            }
+        });
+
+        function showMessage(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `mb-6 p-4 rounded-lg ${type === 'success'
+                    ? 'bg-green-500/20 border border-green-500/30 text-green-300'
+                    : 'bg-red-500/20 border border-red-500/30 text-red-300'
                 }`;
             statusMessage.classList.remove('hidden');
 
