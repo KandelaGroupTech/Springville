@@ -27,8 +27,9 @@
   </script>
   <style>
     body {
-      background-color: #0f172a;
+      background: linear-gradient(135deg, #000000 0%, #006464 100%);
       color: #e2e8f0;
+      min-height: 100vh;
     }
 
     ::-webkit-scrollbar {
@@ -41,13 +42,24 @@
 <body class="min-h-screen flex flex-col items-center justify-center p-8 font-sans relative">
 
   <!-- Date and Time Display -->
-  <div class="absolute top-6 right-6 md:top-10 md:right-10 text-right z-20">
+  <div class="w-full text-right mb-8 md:absolute md:top-10 md:right-10 md:mb-0 z-20">
     <div id="current-time" class="text-3xl md:text-5xl font-serif text-white font-bold tracking-wider drop-shadow-lg">
       --:--</div>
     <div id="current-date"
       class="text-casa-gold text-xs md:text-sm uppercase tracking-[0.2em] mt-1 font-medium drop-shadow-md">-- --, ----
     </div>
   </div>
+
+  <!-- Full Screen Button -->
+  <button id="fullscreen-btn"
+    class="fixed bottom-6 right-6 text-white/30 hover:text-white/80 transition-all duration-300 z-50 p-2"
+    title="Toggle Full Screen">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+      class="w-6 h-6">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+    </svg>
+  </button>
 
   <div id="loading" class="text-casa-gold text-xl animate-pulse">Loading guest experience...</div>
 
@@ -167,6 +179,21 @@
 
     setInterval(updateDateTime, 1000);
     updateDateTime(); // Initial call
+
+    // Full Screen Toggle
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+
+    fullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch((err) => {
+          console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    });
   </script>
 </body>
 
