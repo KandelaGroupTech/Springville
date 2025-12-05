@@ -7,7 +7,7 @@
   <title>Casa Springville Welcome</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@300;400;500;600&display=swap"
     rel="stylesheet">
   <script>
     tailwind.config = {
@@ -29,170 +29,325 @@
     body {
       background: linear-gradient(135deg, #000000 0%, #006464 100%);
       color: #e2e8f0;
-      min-height: 100vh;
     }
 
-    ::-webkit-scrollbar {
-      width: 0px;
-      background: transparent;
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      /* IE and Edge */
+      scrollbar-width: none;
+      /* Firefox */
     }
   </style>
 </head>
 
-<body class="min-h-screen flex flex-col items-center justify-center p-8 font-sans relative">
+<body
+  class="h-screen w-screen overflow-hidden flex flex-col items-center justify-center font-sans relative p-6 md:p-10">
 
-  <!-- Date and Time Display -->
-  <div class="w-full text-right mb-8 md:absolute md:top-10 md:right-10 md:mb-0 z-20">
-    <div id="current-time" class="text-3xl md:text-5xl font-serif text-white font-bold tracking-wider drop-shadow-lg">
+  <!-- Date and Time (Fixed Top LEFT to avoid overlap) -->
+  <div class="fixed top-8 left-10 text-left z-50 pointer-events-none">
+    <div id="current-time" class="text-4xl md:text-5xl font-serif text-white font-bold tracking-wider drop-shadow-lg">
       --:--</div>
-    <div id="current-date"
-      class="text-casa-gold text-xs md:text-sm uppercase tracking-[0.2em] mt-1 font-medium drop-shadow-md">-- --, ----
+    <div id="current-date" class="text-casa-gold text-xs uppercase tracking-[0.2em] mt-1 font-medium drop-shadow-md">--
+      --, ----
     </div>
+  </div>
+
+  <!-- Loading State -->
+  <div id="loading"
+    class="text-casa-gold text-xl animate-pulse absolute inset-0 flex items-center justify-center bg-black/80 z-50">
+    Loading guest experience...</div>
+
+  <!-- Dashboard Container -->
+  <div id="dashboard" class="hidden w-full max-w-[1600px] h-full grid grid-rows-[55%_45%] gap-8">
+
+    <!-- TOP ROW: Info Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 min-h-0">
+
+      <!-- Col 1: Welcome & Concierge -->
+      <div class="flex flex-col gap-6 h-full min-h-0 pt-16">
+        <!-- Added Top Padding to account for Date/Time if needed, though Date is fixed -->
+        <!-- Header -->
+        <div class="space-y-1 flex-shrink-0">
+          <h2 class="text-casa-gold tracking-widest uppercase text-[10px] font-semibold">Guest Access</h2>
+          <h1 class="text-4xl md:text-6xl font-serif text-white leading-tight">
+            Welcome, <br><span id="guest-name" class="text-casa-gold italic">Guest</span>.
+          </h1>
+        </div>
+
+        <!-- Concierge Note (Compact) -->
+        <div
+          class="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-2xl flex-grow flex flex-col justify-center shadow-lg relative overflow-hidden group min-h-0">
+          <div
+            class="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
+          </div>
+          <div class="overflow-y-auto scrollbar-hide relative z-10 flex items-center justify-center h-full">
+            <p id="concierge-note"
+              class="text-lg md:text-xl font-serif italic leading-relaxed text-gray-100 text-center">
+              "Welcome to Casa Springville."
+            </p>
+          </div>
+          <div
+            class="mt-4 flex flex-shrink-0 items-center justify-center space-x-2 text-[10px] text-gray-400 uppercase tracking-wider relative z-10">
+            <span class="w-6 h-px bg-casa-gold"></span>
+            <span>Concierge</span>
+            <span class="w-6 h-px bg-casa-gold"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Col 2: House Rules -->
+      <div class="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-2xl h-full flex flex-col min-h-0">
+        <h3
+          class="text-casa-gold text-xs uppercase tracking-wider font-semibold mb-4 flex items-center gap-2 flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          House Rules
+        </h3>
+        <ul class="space-y-4 text-gray-300 font-light text-sm overflow-y-auto pr-2 scrollbar-hide">
+          <li class="flex gap-3">
+            <span class="text-casa-gold font-mono text-xs pt-1">01</span>
+            <span><strong class="text-white font-medium">Quiet Hours:</strong> Please observe quiet time from 9:00 PM
+              onwards.</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="text-casa-gold font-mono text-xs pt-1">02</span>
+            <span><strong class="text-white font-medium">Kitchen:</strong> Please refill the water jug in the
+              refrigerator if you finish it.</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="text-casa-gold font-mono text-xs pt-1">03</span>
+            <span><strong class="text-white font-medium">Smoking:</strong> No smoking is permitted inside.</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="text-casa-gold font-mono text-xs pt-1">04</span>
+            <span><strong class="text-white font-medium">Enjoy:</strong> Please feel at home!</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="text-casa-gold font-mono text-xs pt-1">05</span>
+            <span><strong class="text-white font-medium">Safety:</strong> Lock doors when leaving.</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Col 3: Details & Emergency -->
+      <div class="flex flex-col gap-6 h-full min-h-0">
+        <!-- Dates -->
+        <div class="grid grid-cols-2 gap-4 flex-shrink-0">
+          <div class="bg-white/5 p-3 rounded-xl border border-white/10 text-center">
+            <div class="text-casa-gold text-[10px] uppercase tracking-wider mb-1">Check-in</div>
+            <div id="check-in" class="text-lg font-serif text-white">--</div>
+          </div>
+          <div class="bg-white/5 p-3 rounded-xl border border-white/10 text-center">
+            <div class="text-casa-gold text-[10px] uppercase tracking-wider mb-1">Check-out</div>
+            <div id="check-out" class="text-lg font-serif text-white">--</div>
+          </div>
+        </div>
+
+        <!-- Emergency -->
+        <div class="bg-red-900/20 backdrop-blur-md border border-red-500/20 p-5 rounded-2xl flex-shrink-0">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-red-400 text-xs uppercase tracking-wider font-semibold flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              Emergency Included
+            </h3>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-gray-400 text-[10px] uppercase tracking-wider mb-1">Emergency Service</p>
+              <p class="text-3xl text-white font-bold font-serif">911</p>
+            </div>
+            <div>
+              <p class="text-gray-400 text-[10px] uppercase tracking-wider mb-1">Silver Spring Policy</p>
+              <a href="tel:3012798000" class="text-base text-white font-serif hover:text-red-400">301-279-8000</a>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-white/5">
+            <p class="text-white text-xs font-semibold">Silver Spring Police Dept</p>
+            <p class="text-gray-400 text-[10px]">8045 Newell St • 0.3 Miles Away</p>
+          </div>
+        </div>
+
+        <!-- WiFi (Refined Horizontal Layout) -->
+        <div
+          class="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-2xl flex items-center justify-center gap-6 flex-grow min-h-0 relative overflow-hidden">
+          <div class="absolute top-0 left-0 w-full h-1 bg-casa-gold/30"></div>
+
+          <!-- QR Code (Left) -->
+          <div class="bg-white p-2 rounded-xl shadow-lg flex-shrink-0">
+            <img src="/assets/wifi-qr-code.png" alt="WiFi QR Code" class="w-24 h-24 object-contain">
+          </div>
+
+          <!-- Details (Right) -->
+          <div class="text-left space-y-2">
+            <h3 class="text-casa-gold text-xs uppercase tracking-wider font-semibold">Priority WiFi Access</h3>
+            <div>
+              <p class="text-2xl text-white font-serif leading-none select-all">Verizon_QZ3ZXJ</p>
+              <p class="text-gray-400 text-xs mt-1 uppercase tracking-wider mb-1">Network Name</p>
+            </div>
+            <div>
+              <p class="text-gray-300 text-sm font-mono select-all bg-black/30 px-2 py-1 rounded inline-block">
+                aid-maid4-zap</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM ROW: Weather (Hero Section) -->
+    <div id="weather-section"
+      class="bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-3xl flex flex-col relative overflow-hidden min-h-0 w-full">
+      <!-- Background decorative elements -->
+      <div
+        class="absolute top-0 right-0 p-40 bg-casa-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none">
+      </div>
+
+      <div class="flex items-center justify-between mb-6 flex-shrink-0 relative z-10 w-full">
+        <h3 class="text-casa-gold text-sm uppercase tracking-widest font-semibold flex items-center gap-3">
+          <span class="text-2xl">🌤️</span> Silver Spring Forecast
+        </h3>
+        <div class="flex gap-2 text-white/20">
+          <!-- Decorative dots -->
+          <div class="w-2 h-2 rounded-full bg-current"></div>
+          <div class="w-2 h-2 rounded-full bg-current"></div>
+          <div class="w-2 h-2 rounded-full bg-current"></div>
+        </div>
+      </div>
+
+      <!-- Weather Cards Container (Full Width, Consistent Sizing) -->
+      <div id="weather-scroll"
+        class="flex-grow flex items-center justify-between gap-4 overflow-x-auto pb-2 scrollbar-hide relative z-10 w-full">
+        <!-- Injected Javascript Cards -->
+      </div>
+    </div>
+
   </div>
 
   <!-- Full Screen Button -->
   <button id="fullscreen-btn"
-    class="fixed bottom-6 right-6 text-white/30 hover:text-white/80 transition-all duration-300 z-50 p-2"
+    class="fixed bottom-6 right-6 text-white/20 hover:text-white/80 transition-all duration-300 z-50 p-3 bg-black/20 rounded-full backdrop-blur-sm border border-white/5"
     title="Toggle Full Screen">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-      class="w-6 h-6">
+      class="w-5 h-5">
       <path stroke-linecap="round" stroke-linejoin="round"
         d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
     </svg>
   </button>
 
-  <div id="loading" class="text-casa-gold text-xl animate-pulse">Loading guest experience...</div>
-
-  <div id="dashboard" class="hidden w-full max-w-4xl space-y-12 text-center">
-
-    <!-- Header -->
-    <header class="space-y-4">
-      <h2 class="text-casa-gold tracking-widest uppercase text-sm font-semibold">Guest Access</h2>
-      <h1 class="text-5xl md:text-7xl font-serif text-white">
-        Welcome, <span id="guest-name" class="text-casa-gold">Guest</span>.
-      </h1>
-    </header>
-
-    <!-- Concierge Note -->
-    <div class="bg-white/5 backdrop-blur-sm border border-white/10 p-8 rounded-2xl shadow-2xl max-w-2xl mx-auto">
-      <p id="concierge-note" class="text-xl md:text-2xl font-serif italic leading-relaxed text-gray-200">
-        "Welcome to Casa Springville."
-      </p>
-      <div class="mt-6 flex items-center justify-center space-x-2 text-sm text-gray-400 uppercase tracking-wider">
-        <span class="w-8 h-px bg-casa-gold"></span>
-        <span>Concierge Message</span>
-        <span class="w-8 h-px bg-casa-gold"></span>
-      </div>
-    </div>
-
-    <!-- Details -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
-      <div class="bg-white/5 p-6 rounded-xl border border-white/10">
-        <div class="text-casa-gold text-sm uppercase tracking-wider mb-2">Check-in</div>
-        <div id="check-in" class="text-2xl font-serif text-white">--</div>
-      </div>
-      <div class="bg-white/5 p-6 rounded-xl border border-white/10">
-        <div class="text-casa-gold text-sm uppercase tracking-wider mb-2">Check-out</div>
-        <div id="check-out" class="text-2xl font-serif text-white">--</div>
-      </div>
-    </div>
-
-    <!-- WiFi Information -->
-    <div
-      class="bg-white/5 p-8 rounded-2xl border border-white/10 max-w-2xl mx-auto flex flex-col md:flex-row items-center gap-8">
-      <div class="flex-shrink-0 bg-white p-2 rounded-lg">
-        <img src="/assets/wifi-qr-code.png" alt="WiFi QR Code" class="w-32 h-32 object-contain">
-      </div>
-      <div class="text-left space-y-3 flex-grow">
-        <h3 class="text-casa-gold text-sm uppercase tracking-wider font-semibold">WiFi Access</h3>
-        <div class="space-y-1">
-          <p class="text-gray-400 text-sm">Network Name</p>
-          <p class="text-xl text-white font-serif">Verizon_QZ3ZXJ</p>
-        </div>
-        <div class="space-y-1">
-          <p class="text-gray-400 text-sm">Password</p>
-          <p class="text-xl text-white font-serif tracking-wider">aid-maid4-zap</p>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
   <script>
+    // Guest Data Logic
     fetch('/api/get-guest')
       .then(res => res.json())
       .then(data => {
-        document.getElementById('loading').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
+        const dashboard = document.getElementById('dashboard');
+        const loading = document.getElementById('loading');
 
-        if (data.firstName) {
-          document.getElementById('guest-name').textContent = data.firstName;
-        }
-        if (data.conciergeNote) {
-          document.getElementById('concierge-note').textContent = `"${data.conciergeNote}"`;
-        }
-        if (data.checkIn) {
-          // Append T00:00:00 to force local time interpretation instead of UTC
-          document.getElementById('check-in').textContent = new Date(data.checkIn + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-        }
-        if (data.checkOut) {
-          document.getElementById('check-out').textContent = new Date(data.checkOut + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-        }
+        loading.classList.add('hidden');
+        dashboard.classList.remove('hidden');
+
+        if (data.firstName) document.getElementById('guest-name').innerText = data.firstName; // innerText to support text transform if needed, though class handles it
+        if (data.conciergeNote) document.getElementById('concierge-note').textContent = `"${data.conciergeNote}"`;
+        if (data.checkIn) document.getElementById('check-in').textContent = new Date(data.checkIn + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        if (data.checkOut) document.getElementById('check-out').textContent = new Date(data.checkOut + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       })
       .catch(err => {
         console.error("API Error, using fallback:", err);
-        // Fallback to default data
         const today = new Date();
         const nextWeek = new Date(today);
         nextWeek.setDate(today.getDate() + 7);
 
-        const defaultData = {
-          firstName: "Guest",
-          conciergeNote: "Welcome to Casa Springville.",
-          checkIn: today.toISOString(),
-          checkOut: nextWeek.toISOString()
-        };
-
         document.getElementById('loading').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
-
-        document.getElementById('guest-name').textContent = defaultData.firstName;
-        document.getElementById('concierge-note').textContent = `"${defaultData.conciergeNote}"`;
-        document.getElementById('check-in').textContent = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-        document.getElementById('check-out').textContent = nextWeek.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+        document.getElementById('check-in').textContent = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        document.getElementById('check-out').textContent = nextWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       });
 
-    // Date and Time Update
-    function updateDateTime() {
-      const now = new Date();
+    // Weather Logic (Horizontal, Big Icons, Text Desc)
+    const weatherSection = document.getElementById('weather-section');
+    const weatherScroll = document.getElementById('weather-scroll');
+    const weatherCodes = {
+      0: { icon: '☀️', desc: 'Clear' },
+      1: { icon: '🌤️', desc: 'Mostly Clear' },
+      2: { icon: '🌥️', desc: 'Partly Cloudy' },
+      3: { icon: '☁️', desc: 'Overcast' },
+      45: { icon: '🌫️', desc: 'Fog' },
+      48: { icon: '🌫️', desc: 'Icy Fog' },
+      51: { icon: '🌦️', desc: 'Drizzle' },
+      53: { icon: '🌦️', desc: 'Drizzle' },
+      55: { icon: '🌦️', desc: 'Drizzle' },
+      61: { icon: '🌧️', desc: 'Rain' },
+      63: { icon: '🌧️', desc: 'Rain' },
+      65: { icon: '🌧️', desc: 'Heavy Rain' },
+      71: { icon: '❄️', desc: 'Snow' },
+      73: { icon: '❄️', desc: 'Snow' },
+      75: { icon: '❄️', desc: 'Heavy Snow' },
+      95: { icon: '⛈️', desc: 'Thunder' }
+    };
 
-      // Time: 12:00 PM
-      const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
-      const timeString = now.toLocaleTimeString('en-US', timeOptions);
-      document.getElementById('current-time').textContent = timeString;
-
-      // Date: THURSDAY, DECEMBER 5
-      const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
-      const dateString = now.toLocaleDateString('en-US', dateOptions);
-      document.getElementById('current-date').textContent = dateString;
+    function getWeatherInfo(code) {
+      return weatherCodes[code] || { icon: '⛅', desc: 'Cloudy' };
     }
 
-    setInterval(updateDateTime, 1000);
-    updateDateTime(); // Initial call
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=38.9907&longitude=-77.0261&daily=weather_code,temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&timezone=America%2FNew_York&forecast_days=8')
+      .then(res => res.json())
+      .then(data => {
+        if (!data.daily) return;
 
-    // Full Screen Toggle
-    const fullscreenBtn = document.getElementById('fullscreen-btn');
+        weatherScroll.innerHTML = '';
 
-    fullscreenBtn.addEventListener('click', () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch((err) => {
-          console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+        // Render rows
+        data.daily.time.forEach((time, index) => {
+          const date = new Date(time + 'T00:00:00');
+          const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+          const maxTemp = Math.round(data.daily.temperature_2m_max[index]);
+          const minTemp = Math.round(data.daily.temperature_2m_min[index]);
+          const code = data.daily.weather_code[index];
+          const info = getWeatherInfo(code);
+
+          // Hero Sizing
+          const card = document.createElement('div');
+          card.className = "flex-1 min-w-[100px] h-full flex flex-col items-center justify-center p-3 rounded-2xl bg-white/5 hover:bg-white/10 transition-all duration-300 border border-white/5 hover:border-white/20 hover:-translate-y-1 cursor-default group";
+
+          card.innerHTML = `
+              <span class="text-xs md:text-sm text-casa-gold uppercase font-bold tracking-widest mb-2">${dayName}</span>
+              <span class="text-4xl md:text-5xl mb-2 group-hover:scale-110 transition-transform filter drop-shadow-lg">${info.icon}</span>
+              <span class="text-[10px] text-gray-300 uppercase tracking-wider mb-2 font-medium">${info.desc}</span>
+              <div class="flex items-center gap-2">
+                  <span class="text-lg md:text-xl font-bold text-white">${maxTemp}°</span>
+                  <span class="text-sm text-gray-500 font-medium">${minTemp}°</span>
+              </div>
+          `;
+          weatherScroll.appendChild(card);
         });
-      } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        }
-      }
+      })
+      .catch(console.error);
+
+    // DateTime
+    function updateDateTime() {
+      const now = new Date();
+      document.getElementById('current-time').textContent = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+      document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    // Fullscreen
+    document.getElementById('fullscreen-btn').addEventListener('click', () => {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(console.error);
+      else if (document.exitFullscreen) document.exitFullscreen();
     });
   </script>
 </body>
