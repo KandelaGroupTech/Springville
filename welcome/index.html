@@ -366,6 +366,11 @@
       if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(console.error);
       else if (document.exitFullscreen) document.exitFullscreen();
     });
+
+    // Auto-refresh every 5 minutes to keep weather and guest data current
+    setInterval(() => {
+      location.reload();
+    }, 300000); // 300000ms = 5 minutes
   </script>
 </body>
 
