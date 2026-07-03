@@ -26,6 +26,12 @@
         }
     </script>
     <style>
+        html, body {
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
         body {
             background-color: #0F172A;
             color: #e2e8f0;
@@ -43,7 +49,7 @@
         </div>
     </div>
 
-    <main class="relative z-10 max-w-md w-full text-center">
+    <main id="fit-content" class="relative z-10 max-w-md w-full text-center">
 
         <!-- Logo / Brand -->
         <div class="mb-12 animate-fade-in-down">
@@ -100,6 +106,13 @@
         </footer>
 
     </main>
+
+    <script src="/fit-to-screen.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fitToScreen('fit-content');
+        });
+    </script>
 
 </body>
 

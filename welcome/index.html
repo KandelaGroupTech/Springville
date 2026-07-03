@@ -49,22 +49,23 @@
 <body
   class="h-screen w-screen overflow-hidden flex flex-col items-center justify-center font-sans relative p-6 md:p-10">
 
-  <!-- Date and Time (Fixed Top LEFT to avoid overlap) -->
-  <div class="fixed top-8 left-10 text-left z-50 pointer-events-none">
-    <div id="current-time" class="text-4xl md:text-5xl font-serif text-white font-bold tracking-wider drop-shadow-lg">
-      --:--</div>
-    <div id="current-date" class="text-casa-gold text-xs uppercase tracking-[0.2em] mt-1 font-medium drop-shadow-md">--
-      --, ----
-    </div>
-  </div>
-
   <!-- Loading State -->
   <div id="loading"
     class="text-casa-gold text-xl animate-pulse absolute inset-0 flex items-center justify-center bg-black/80 z-50">
     Loading guest experience...</div>
 
   <!-- Dashboard Container -->
-  <div id="dashboard" class="hidden w-full max-w-[1600px] h-full grid grid-rows-[55%_45%] gap-8">
+  <!-- Fixed 1600x900 design canvas; fit-to-screen.js scales it to the real viewport -->
+  <div id="dashboard" class="hidden relative grid grid-rows-[55fr_45fr] gap-8" style="width: 1600px; height: 900px; flex-shrink: 0;">
+
+    <!-- Date and Time (top left of the canvas so it scales with everything else) -->
+    <div class="absolute top-0 left-2 text-left z-50 pointer-events-none">
+      <div id="current-time" class="text-4xl md:text-5xl font-serif text-white font-bold tracking-wider drop-shadow-lg">
+        --:--</div>
+      <div id="current-date" class="text-casa-gold text-xs uppercase tracking-[0.2em] mt-1 font-medium drop-shadow-md">--
+        --, ----
+      </div>
+    </div>
 
     <!-- TOP ROW: Info Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 min-h-0">
@@ -371,6 +372,14 @@
     setInterval(() => {
       location.reload();
     }, 300000); // 300000ms = 5 minutes
+  </script>
+
+  <script src="/fit-to-screen.js"></script>
+  <script>
+    // The dashboard is a fixed 1600x900 canvas. Scale it (up or down) to
+    // whatever viewport the browser reports so every component keeps the
+    // same proportions on any screen, including TVs that misreport size.
+    fitToScreen('dashboard', { maxScale: 4, padding: 16 });
   </script>
 </body>
 

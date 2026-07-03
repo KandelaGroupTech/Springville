@@ -26,6 +26,12 @@
         }
     </script>
     <style>
+        html, body {
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
         body {
             background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.90)),
                 url('https://images.unsplash.com/photo-1562095241-8c6714fd4178?w=1920&q=80') center/cover no-repeat fixed;
@@ -66,7 +72,7 @@
 
 <body class="min-h-screen flex flex-col items-center justify-center p-6">
 
-    <main class="relative z-10 max-w-2xl w-full">
+    <main id="fit-content" class="relative z-10 max-w-2xl w-full">
 
         <!-- Header -->
         <div class="mb-8 text-center">
@@ -258,6 +264,11 @@
 
         // Set minimum dates on page load
         setMinDates();
+    </script>
+
+    <script src="/fit-to-screen.js"></script>
+    <script>
+        fitToScreen('fit-content');
     </script>
 
 </body>
