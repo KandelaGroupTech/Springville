@@ -319,27 +319,31 @@
       return weatherCodes[code] || { icon: '⛅', desc: 'Cloudy' };
     }
 
-    fetch('https://api.open-meteo.com/v1/forecast?latitude=38.9907&longitude=-77.0261&daily=weather_code,temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&timezone=America%2FNew_York&forecast_days=8')
-      .then(res => res.json())
-      .then(data => {
-        if (!data.daily) return;
+    const WEATHER_URL = 'https://api.open-meteo.com/v1/forecast?latitude=38.9907&longitude=-77.0261&daily=weather_code,temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&timezone=America%2FNew_York&forecast_days=8';
+    const WEATHER_CACHE_KEY = 'casa-weather-cache';
 
-        weatherScroll.innerHTML = '';
+    function renderForecast(daily) {
+      weatherScroll.innerHTML = '';
 
-        // Render rows
-        data.daily.time.forEach((time, index) => {
-          const date = new Date(time + 'T00:00:00');
-          const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-          const maxTemp = Math.round(data.daily.temperature_2m_max[index]);
-          const minTemp = Math.round(data.daily.temperature_2m_min[index]);
-          const code = data.daily.weather_code[index];
-          const info = getWeatherInfo(code);
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
 
-          // Hero Sizing
-          const card = document.createElement('div');
-          card.className = "flex-1 min-w-[100px] h-full flex flex-col items-center justify-center p-3 rounded-2xl bg-white/5 hover:bg-white/10 transition-all duration-300 border border-white/5 hover:border-white/20 hover:-translate-y-1 cursor-default group";
+      // Render rows
+      daily.time.forEach((time, index) => {
+        const date = new Date(time + 'T00:00:00');
+        if (date < startOfToday) return; // cached forecasts may include past days
 
-          card.innerHTML = `
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+        const maxTemp = Math.round(daily.temperature_2m_max[index]);
+        const minTemp = Math.round(daily.temperature_2m_min[index]);
+        const code = daily.weather_code[index];
+        const info = getWeatherInfo(code);
+
+        // Hero Sizing
+        const card = document.createElement('div');
+        card.className = "flex-1 min-w-[100px] h-full flex flex-col items-center justify-center p-3 rounded-2xl bg-white/5 hover:bg-white/10 transition-all duration-300 border border-white/5 hover:border-white/20 hover:-translate-y-1 cursor-default group";
+
+        card.innerHTML = `
               <span class="text-xs md:text-sm text-casa-gold uppercase font-bold tracking-widest mb-2">${dayName}</span>
               <span class="text-4xl md:text-5xl mb-2 group-hover:scale-110 transition-transform filter drop-shadow-lg">${info.icon}</span>
               <span class="text-[10px] text-gray-300 uppercase tracking-wider mb-2 font-medium">${info.desc}</span>
@@ -348,10 +352,43 @@
                   <span class="text-sm text-gray-500 font-medium">${minTemp}°</span>
               </div>
           `;
-          weatherScroll.appendChild(card);
+        weatherScroll.appendChild(card);
+      });
+    }
+
+    function loadWeather(attempt) {
+      attempt = attempt || 0;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 10000);
+
+      fetch(WEATHER_URL, { signal: controller.signal })
+        .then(res => res.json())
+        .then(data => {
+          clearTimeout(timer);
+          if (!data.daily) throw new Error('Malformed weather response');
+          renderForecast(data.daily);
+          try {
+            localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), daily: data.daily }));
+          } catch (e) { /* storage unavailable; live data still rendered */ }
+        })
+        .catch(err => {
+          clearTimeout(timer);
+          console.error('Weather fetch failed:', err);
+
+          // Fall back to the last successful forecast so the section
+          // survives weather-API outages (the page reloads every 5 min).
+          let cached = null;
+          try { cached = JSON.parse(localStorage.getItem(WEATHER_CACHE_KEY)); } catch (e) { }
+          if (cached && cached.daily) {
+            renderForecast(cached.daily);
+          } else if (weatherScroll.children.length === 0) {
+            weatherScroll.innerHTML = '<div class="w-full text-center text-gray-400 text-xs uppercase tracking-[0.2em]">Forecast temporarily unavailable</div>';
+          }
+
+          if (attempt < 2) setTimeout(() => loadWeather(attempt + 1), 60000);
         });
-      })
-      .catch(console.error);
+    }
+    loadWeather();
 
     // DateTime
     function updateDateTime() {
